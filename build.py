@@ -34,12 +34,7 @@ def make_model(
     if use_decoder:
         decoder = Decoder(DecoderLayer(d_model, c(attn), c(attn), c(ff), dropout), N)
     
-    model = Transformer(
-        encoder,
-        decoder,
-        src_embed,
-        tgt_embed,
-        generator)
+    model = Transformer(encoder, decoder, src_embed, tgt_embed, generator)
 
     # Initialize parameters with Glorot / fan_avg.
     for p in model.parameters():
