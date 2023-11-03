@@ -6,35 +6,22 @@ from embeddings import Embeddings, PositionalEncoding
 from feedforward import FeedForward
 from encoder import Encoder, EncoderLayer
 from decoder import Decoder, DecoderLayer
-from architecture import Transformer, Generator
+from architecture import EncoderDecoder, Generator
 
-def make_model(
-    src_vocab, 
-    tgt_vocab, 
-    N=6, 
-    d_model=512, 
-    d_ff=2048, 
-    h=8,
-    dropout=0.1,
-    use_encoder=True,
-    use_decoder=True):
+
+def make_model(config):
     "Helper: Construct a model from hyperparameters."
     c = copy.deepcopy
+    attn = MultiHeadedAttention(config['h'], config['d_model'])
+    ff = FeedForward(config['d_model'], config['d_ff'], config['dropout'])
+    position = PositionalEncoding(config['d_model'], config['dropout'])
+    src_embed = nn.Sequential(Embeddings(config['d_model'], config['src_vocab']), c(position))
+    tgt_embed = nn.Sequential(Embeddings(config['d_model'], config['tgt_vocab']), c(position))
+    generator = Generator(config['d_model'], config['tgt_vocab'])
+    encoder = Encoder(EncoderLayer(config['d_model'], c(attn), c(ff), config['dropout']), config['N'])
+    decoder = Decoder(DecoderLayer(config['d_model'], c(attn), c(attn), c(ff), config['dropout']), config['N'])
     
-    encoder = None
-    decoder = None
-    attn = MultiHeadedAttention(h, d_model)
-    ff = FeedForward(d_model, d_ff, dropout)
-    position = PositionalEncoding(d_model, dropout)
-    src_embed=nn.Sequential(Embeddings(d_model, src_vocab), c(position))
-    tgt_embed=nn.Sequential(Embeddings(d_model, tgt_vocab), c(position))
-    generator=Generator(d_model, tgt_vocab)
-    if use_encoder:
-        encoder = Encoder(EncoderLayer(d_model, c(attn), c(ff), dropout), N)
-    if use_decoder:
-        decoder = Decoder(DecoderLayer(d_model, c(attn), c(attn), c(ff), dropout), N)
-    
-    model = Transformer(encoder, decoder, src_embed, tgt_embed, generator)
+    model = EncoderDecoder(encoder, decoder, src_embed, tgt_embed, generator)
 
     # Initialize parameters with Glorot / fan_avg.
     for p in model.parameters():

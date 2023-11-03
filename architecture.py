@@ -1,25 +1,17 @@
 from torch import nn
 import torch.nn.functional as F
 
-class Transformer(nn.Module):
+class EncoderDecoder(nn.Module):
     """
     A standard Encoder-Decoder architecture
     """
     def __init__(self, encoder, decoder, src_embed, tgt_embed, generator):
-        super(Transformer, self).__init__()
+        super(EncoderDecoder, self).__init__()
+        self.encoder = encoder
+        self.decoder = decoder
         self.src_embed = src_embed
         self.tgt_embed = tgt_embed
         self.generator = generator
-        
-        if encoder is None:
-            self.encoder = lambda x, y: x
-        else:
-            self.encoder = encoder
-        
-        if decoder is None:
-            self.decoder = lambda x, y, z, w: x
-        else:
-            self.decoder = decoder
 
     def forward(self, src, tgt, src_mask=None, tgt_mask=None):
         "Take in and process masked src and target sequences."

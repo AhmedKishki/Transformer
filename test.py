@@ -2,12 +2,12 @@ import torch
 from helpers import *
 from build import make_model
 
-def inference_test():
-    test_model = make_model(11, 11, 2)
+def inference_test(config):
+    torch.set_default_device(config['device'])
+    test_model = make_model(config)
     test_model.eval()
-    src = torch.LongTensor([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]])
+    src = torch.LongTensor([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]]).to(config['device'])
     src_mask = torch.ones(1, 1, 10)
-
     memory = test_model.encode(src, src_mask)
     ys = torch.zeros(1, 1).type_as(src)
 
@@ -25,9 +25,10 @@ def inference_test():
     print("Example Untrained Model Prediction:", ys)
 
 
-def run_tests():
+def run_tests(config):
     for _ in range(10):
-        inference_test()
+        inference_test(config)
         
 if __name__ == "__main__":
-    run_tests()
+    from hyperparameters import *
+    run_tests(config)
