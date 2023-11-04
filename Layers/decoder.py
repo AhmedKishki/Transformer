@@ -1,5 +1,8 @@
 from Layers.layer import LayerNorm, SublayerConnection
 from torch import nn
+import copy
+
+c = copy.deepcopy
     
 class DecoderLayer(nn.Module):
     "Decoder is made of self-attn, src-attn, and feed forward (defined below)"
@@ -10,7 +13,7 @@ class DecoderLayer(nn.Module):
         self.self_attn = self_attn
         self.src_attn = src_attn
         self.feed_forward = feed_forward
-        self.sublayer = nn.ModuleList([SublayerConnection(size, dropout) for _ in range(3)])
+        self.sublayer = nn.ModuleList([c(SublayerConnection(size, dropout)) for _ in range(3)])
 
     def forward(self, x, memory, src_mask, tgt_mask):
         m = memory
@@ -23,7 +26,7 @@ class Decoder(nn.Module):
 
     def __init__(self, layer: DecoderLayer, N: int):
         super(Decoder, self).__init__()
-        self.layers = nn.ModuleList([layer for _ in range(N)])
+        self.layers = nn.ModuleList([c(layer) for _ in range(N)])
         self.norm = LayerNorm(layer.size)
 
     def forward(self, x, memory, src_mask, tgt_mask):

@@ -3,17 +3,18 @@ from torch import nn
 from Layers import *
 from Architectures import *
 
+c = copy.deepcopy
+
 def make_model(config):
     "Helper: Construct a model from hyperparameters."
-    c = copy.deepcopy
-    attn = MultiHeadedAttention(config['h'], config['d_model'])
-    ff = FeedForward(config['d_model'], config['d_ff'], config['dropout'])
-    position = PositionalEncoding(config['d_model'], config['dropout'])
-    src_embed = nn.Sequential(Embeddings(config['d_model'], config['src_vocab']), c(position))
-    tgt_embed = nn.Sequential(Embeddings(config['d_model'], config['tgt_vocab']), c(position))
-    generator = Generator(config['d_model'], config['tgt_vocab'])
-    encoder = Encoder(EncoderLayer(config['d_model'], c(attn), c(ff), config['dropout']), config['N'])
-    decoder = Decoder(DecoderLayer(config['d_model'], c(attn), c(attn), c(ff), config['dropout']), config['N'])
+    attn = MultiHeadedAttention(config.h, config.d_model)
+    ff = FeedForward(config.d_model, config.d_ff, config.dropout)
+    # position = PositionalEncoding(config.d_model, config.dropout)
+    src_embed = Embeddings(config.d_model, config.src_vocab, config.dropout, config.max_len)
+    tgt_embed = Embeddings(config.d_model, config.tgt_vocab, config.dropout, config.max_len)
+    generator = Generator(config.d_model, config.tgt_vocab)
+    encoder = Encoder(EncoderLayer(config.d_model, c(attn), c(ff), config.dropout), config.N)
+    decoder = Decoder(DecoderLayer(config.d_model, c(attn), c(attn), c(ff), config.dropout), config.N)
     
     model = EncoderDecoder(encoder, decoder, src_embed, tgt_embed, generator)
     

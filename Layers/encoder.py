@@ -1,5 +1,8 @@
 from Layers.layer import LayerNorm, SublayerConnection
 from torch import nn
+import copy
+
+c = copy.deepcopy
     
 class EncoderLayer(nn.Module):
     "Encoder is made up of self-attn and feed forward (defined below)"
@@ -8,7 +11,7 @@ class EncoderLayer(nn.Module):
         super(EncoderLayer, self).__init__()
         self.self_attn = self_attn
         self.feed_forward = feed_forward
-        self.sublayer = nn.ModuleList([SublayerConnection(size, dropout) for _ in range(2)])
+        self.sublayer = nn.ModuleList([c(SublayerConnection(size, dropout)) for _ in range(2)])
         self.size = size
 
     def forward(self, x, mask):
@@ -20,7 +23,7 @@ class Encoder(nn.Module):
 
     def __init__(self, layer: EncoderLayer, N: int):
         super(Encoder, self).__init__()
-        self.layers = nn.ModuleList([layer for _ in range(N)])
+        self.layers = nn.ModuleList([c(layer) for _ in range(N)])
         self.norm = LayerNorm(layer.size)
 
     def forward(self, x, mask):

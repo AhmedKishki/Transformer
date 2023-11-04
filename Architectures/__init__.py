@@ -1,1 +1,1 @@
-from Architectures.architecture import EncoderDecoder, Generator
+from Architectures.architecture import EncoderDecoder, BigramLanguageModel, SequenceClassification

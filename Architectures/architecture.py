@@ -2,11 +2,9 @@ from torch import nn
 import torch.nn.functional as F
 
 class EncoderDecoder(nn.Module):
-    """
-    A standard Encoder-Decoder architecture
-    """
+    """A standard Encoder-Decoder architecture"""
     def __init__(self, encoder, decoder, src_embed, tgt_embed, generator):
-        super(EncoderDecoder, self).__init__()
+        super().__init__()
         self.encoder = encoder
         self.decoder = decoder
         self.src_embed = src_embed
@@ -21,19 +19,14 @@ class EncoderDecoder(nn.Module):
         return self.encoder(self.src_embed(src), src_mask)
 
     def decode(self, memory, src_mask, tgt, tgt_mask):
-        return self.decoder(self.tgt_embed(tgt), memory, src_mask, tgt_mask)   
+        return self.decoder(self.tgt_embed(tgt), memory, src_mask, tgt_mask)
     
-class GPT(nn.Module):
-    def __init__(self, decoder):
+class SequenceClassification(nn.Module):
+    """Encoder only"""
+    def __init__(self, encoder, generator):
         super().__init__()
-        pass
-
-
-class Generator(nn.Module):
-    "Define standard linear + softmax generation step."
-    def __init__(self, d_model, vocab):
-        super(Generator, self).__init__()
-        self.proj = nn.Linear(d_model, vocab)
-
-    def forward(self, x):
-        return F.log_softmax(self.proj(x), dim=-1)
+        self.encoder = encoder
+        self.generator = generator
+        
+class BigramLanguageModel(nn.Module):
+    pass

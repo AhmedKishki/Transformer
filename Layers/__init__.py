@@ -1,4 +1,5 @@
 from Layers.layer import LayerNorm, SublayerConnection
+from Layers.generator import Generator
 from Layers.attention import MultiHeadedAttention
 from Layers.feedforward import FeedForward
 from Layers.embeddings import Embeddings, PositionalEncoding
