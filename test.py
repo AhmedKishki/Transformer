@@ -1,8 +1,10 @@
 import torch
-from helpers import *
-from build import make_model
+from mask import *
+from hyperparameters import *
+from make_model import make_model
 
-def inference_test(config):
+
+def inference_test():
     torch.set_default_device(config['device'])
     test_model = make_model(config)
     test_model.eval()
@@ -11,9 +13,9 @@ def inference_test(config):
     memory = test_model.encode(src, src_mask)
     ys = torch.zeros(1, 1).type_as(src)
 
-    for i in range(9):
+    for _ in range(9):
         out = test_model.decode(
-            memory, src_mask, ys, subsequent_mask(ys.size(1)).type_as(src.data)
+            memory, src_mask, ys, Mask((ys.size(1))).subsequent_mask().type_as(src.data)
         )
         prob = test_model.generator(out[:, -1])
         _, next_word = torch.max(prob, dim=1)
@@ -21,14 +23,11 @@ def inference_test(config):
         ys = torch.cat(
             [ys, torch.empty(1, 1).type_as(src.data).fill_(next_word)], dim=1
         )
-
     print("Example Untrained Model Prediction:", ys)
 
-
-def run_tests(config):
+def run_tests():
     for _ in range(10):
-        inference_test(config)
+        inference_test()
         
 if __name__ == "__main__":
-    from hyperparameters import *
-    run_tests(config)
+    run_tests()

@@ -23,6 +23,12 @@ class EncoderDecoder(nn.Module):
     def decode(self, memory, src_mask, tgt, tgt_mask):
         return self.decoder(self.tgt_embed(tgt), memory, src_mask, tgt_mask)   
     
+class GPT(nn.Module):
+    def __init__(self, decoder):
+        super().__init__()
+        pass
+
+
 class Generator(nn.Module):
     "Define standard linear + softmax generation step."
     def __init__(self, d_model, vocab):

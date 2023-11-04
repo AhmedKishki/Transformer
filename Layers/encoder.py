@@ -1,5 +1,4 @@
-from helpers import clones
-from layer import LayerNorm, SublayerConnection
+from Layers.layer import LayerNorm, SublayerConnection
 from torch import nn
     
 class EncoderLayer(nn.Module):
@@ -9,11 +8,10 @@ class EncoderLayer(nn.Module):
         super(EncoderLayer, self).__init__()
         self.self_attn = self_attn
         self.feed_forward = feed_forward
-        self.sublayer = clones(SublayerConnection(size, dropout), 2)
+        self.sublayer = nn.ModuleList([SublayerConnection(size, dropout) for _ in range(2)])
         self.size = size
 
     def forward(self, x, mask):
-        "Follow Figure 1 (left) for connections."
         x = self.sublayer[0](x, lambda x: self.self_attn(x, x, x, mask))
         return self.sublayer[1](x, self.feed_forward)
     
@@ -22,7 +20,7 @@ class Encoder(nn.Module):
 
     def __init__(self, layer: EncoderLayer, N: int):
         super(Encoder, self).__init__()
-        self.layers = clones(layer, N)
+        self.layers = nn.ModuleList([layer for _ in range(N)])
         self.norm = LayerNorm(layer.size)
 
     def forward(self, x, mask):

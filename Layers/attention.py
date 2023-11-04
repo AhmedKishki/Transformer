@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 from math import sqrt
-from helpers import clones
 
 def attention(query, key, value, mask=None, dropout=None):
     "Compute 'Scaled Dot Product Attention'"
@@ -22,7 +21,7 @@ class MultiHeadedAttention(nn.Module):
         # We assume d_v always equals d_k
         self.d_k = d_model // h
         self.h = h
-        self.linears = clones(nn.Linear(d_model, d_model), 4)
+        self.linears = nn.ModuleList([nn.Linear(d_model, d_model) for _ in range(4)])
         self.attn = None
         self.dropout = nn.Dropout(p=dropout)
 

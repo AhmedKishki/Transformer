@@ -1,13 +1,7 @@
 import copy
 from torch import nn
-from helpers import *
-from attention import MultiHeadedAttention
-from embeddings import Embeddings, PositionalEncoding
-from feedforward import FeedForward
-from encoder import Encoder, EncoderLayer
-from decoder import Decoder, DecoderLayer
-from architecture import EncoderDecoder, Generator
-
+from Layers import *
+from Architectures import *
 
 def make_model(config):
     "Helper: Construct a model from hyperparameters."
@@ -22,7 +16,7 @@ def make_model(config):
     decoder = Decoder(DecoderLayer(config['d_model'], c(attn), c(attn), c(ff), config['dropout']), config['N'])
     
     model = EncoderDecoder(encoder, decoder, src_embed, tgt_embed, generator)
-
+    
     # Initialize parameters with Glorot / fan_avg.
     for p in model.parameters():
         if p.dim() > 1:

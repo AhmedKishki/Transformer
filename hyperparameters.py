@@ -12,5 +12,4 @@ config = {
     'dropout': 0.1,
     'model': 'EncoderDecoder',
     'device': device, # default device
-    'init': None,
 }

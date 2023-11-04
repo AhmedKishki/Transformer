@@ -1,5 +1,4 @@
-from helpers import clones
-from layer import LayerNorm, SublayerConnection
+from Layers.layer import LayerNorm, SublayerConnection
 from torch import nn
     
 class DecoderLayer(nn.Module):
@@ -11,10 +10,9 @@ class DecoderLayer(nn.Module):
         self.self_attn = self_attn
         self.src_attn = src_attn
         self.feed_forward = feed_forward
-        self.sublayer = clones(SublayerConnection(size, dropout), 3)
+        self.sublayer = nn.ModuleList([SublayerConnection(size, dropout) for _ in range(3)])
 
     def forward(self, x, memory, src_mask, tgt_mask):
-        "Follow Figure 1 (right) for connections."
         m = memory
         x = self.sublayer[0](x, lambda x: self.self_attn(x, x, x, tgt_mask))
         x = self.sublayer[1](x, lambda x: self.src_attn(x, m, m, src_mask))
@@ -25,7 +23,7 @@ class Decoder(nn.Module):
 
     def __init__(self, layer: DecoderLayer, N: int):
         super(Decoder, self).__init__()
-        self.layers = clones(layer, N)
+        self.layers = nn.ModuleList([layer for _ in range(N)])
         self.norm = LayerNorm(layer.size)
 
     def forward(self, x, memory, src_mask, tgt_mask):
