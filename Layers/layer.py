@@ -3,7 +3,7 @@ from torch import nn
 import torch.nn.functional as F
 
 class LayerNorm(nn.Module):
-    "Construct a layernorm module (See citation for details)."
+    "Construct a layernorm module"
 
     def __init__(self, features, eps=1e-6):
         super(LayerNorm, self).__init__()
@@ -18,8 +18,7 @@ class LayerNorm(nn.Module):
     
 class SublayerConnection(nn.Module):
     """
-    A residual connection followed by a layer norm.
-    Note for code simplicity the norm is first as opposed to last.
+    A residual connection followed by a layer norm. Note for code simplicity the norm is first as opposed to last.
     """
 
     def __init__(self, size, dropout):

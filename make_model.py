@@ -9,14 +9,13 @@ def make_model(config):
     "Helper: Construct a model from hyperparameters."
     attn = MultiHeadedAttention(config.h, config.d_model)
     ff = FeedForward(config.d_model, config.d_ff, config.dropout)
-    # position = PositionalEncoding(config.d_model, config.dropout)
     src_embed = Embeddings(config.d_model, config.src_vocab, config.dropout, config.max_len)
     tgt_embed = Embeddings(config.d_model, config.tgt_vocab, config.dropout, config.max_len)
-    generator = Generator(config.d_model, config.tgt_vocab)
+    proj = nn.Linear(config.d_model, config.tgt_vocab)
     encoder = Encoder(EncoderLayer(config.d_model, c(attn), c(ff), config.dropout), config.N)
     decoder = Decoder(DecoderLayer(config.d_model, c(attn), c(attn), c(ff), config.dropout), config.N)
     
-    model = EncoderDecoder(encoder, decoder, src_embed, tgt_embed, generator)
+    model = EncoderDecoder(encoder, decoder, proj, src_embed, tgt_embed)
     
     # Initialize parameters with Glorot / fan_avg.
     for p in model.parameters():
