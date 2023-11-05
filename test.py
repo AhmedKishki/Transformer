@@ -1,5 +1,5 @@
 import torch
-from mask import *
+from Transformer.Processing.batchmask import *
 from config import *
 from make_model import make_model
 
@@ -13,7 +13,7 @@ def inference_test(config):
     ys = torch.zeros(1, 1).type_as(src)
 
     for _ in range(9):
-        out = test_model.decode(memory, src_mask, ys, Mask((ys.size(1))).subsequent_mask().type_as(src.data))
+        out = test_model.decode(memory, src_mask, ys, subsequent_mask((ys.size(1))).type_as(src.data))
         prob = test_model.generate(out[:, -1])
         _, next_word = torch.max(prob, dim=1)
         next_word = next_word.data[0]

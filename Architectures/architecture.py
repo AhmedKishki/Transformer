@@ -24,7 +24,7 @@ class EncoderDecoder(nn.Module):
         return self.decoder(self.tgt_embed(tgt), memory, src_mask, tgt_mask)
 
     def generate(self, src, src_mask, max_len, start_symbol):
-        """greedy decode"""
+        """greedy decoder"""
         memory = self.encode(src, src_mask)
         ys = torch.zeros(1, 1).fill_(start_symbol).type_as(src.data)
         for _ in range(max_len - 1):
@@ -32,8 +32,8 @@ class EncoderDecoder(nn.Module):
             out = self.decode(memory, ys, src_mask, tgt_mask)
             prob = F.log_softmax(self.proj(out[:, -1]), dim=-1)
             _, next_word = torch.max(prob, dim=1)
-        next_word = next_word.data[0]
-        ys = torch.cat([ys, torch.zeros(1, 1).type_as(src.data).fill_(next_word)], dim=1)
+            next_word = next_word.data[0]
+            ys = torch.cat([ys, torch.zeros(1, 1).type_as(src.data).fill_(next_word)], dim=1)
         return ys
 
 class BigramLanguageModel(nn.Module):
