@@ -38,19 +38,28 @@ class EncoderDecoder(nn.Module):
 
 class BigramLanguageModel(nn.Module):
     """Decoder Only. Ref: nanoGPT"""
-    def __init__(self, decoder, projection, src_embed, tgt_embed):
+    def __init__(self, decoder, projection, embedding):
         super().__init__()
         self.decoder = decoder
-        self.src_embed = src_embed
-        self.tgt_embed = tgt_embed
+        self.embed = embedding
         self.proj = projection
 
-    def forward(self, src, tgt, src_mask=None, tgt_mask=None):
-        return self.decoder(self.tgt_embed(tgt), self.src_embed(src), src_mask, tgt_mask)
-    
+    def forward(self, idx):
+        return self.decoder(self.embed(idx), self.embed(idx), None, subsequent_mask(idx.size(1)).type_as(idx.data))
+
     def generate(self, idx, max_len):
-        pass
-    
+        for _ in range(max_len):
+            logits = self.proj(self(idx))
+            # focus only on the last time step
+            logits = logits[:, -1] # becomes (B, C)
+            # apply softmax to get probabilities
+            probs = F.softmax(logits, dim=-1) # (B, C)
+            # sample from the distribution
+            idx_next = torch.multinomial(probs, num_samples=1) # (B, 1)
+            # append sampled index to the running sequence
+            idx = torch.cat((idx, idx_next), dim=1) # (B, T+1)
+        return idx
+          
 def subsequent_mask(size):
     "Mask out subsequent positions."
     attn_shape = (1, size, size)

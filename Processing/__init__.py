@@ -1,2 +1,2 @@
-from Processing.batchmask import BatchMask
+from Processing.batchmask import BatchMask, subsequent_mask
 from Processing.labelsmoothing import LabelSmoothing

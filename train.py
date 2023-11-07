@@ -20,15 +20,13 @@ def run_epoch(
     train_state=TrainState(),
 ):
     """Train a single epoch"""
-    start = time.time()
     total_tokens = 0
     total_loss = 0
     tokens = 0
     n_accum = 0
     for i, batch in enumerate(data_iter):
-        out = model.forward(
-            batch.src, batch.tgt, batch.src_mask, batch.tgt_mask
-        )
+        start = time.time()
+        out = model(batch.src, batch.tgt, batch.src_mask, batch.tgt_mask)
         loss, loss_node = loss_compute(out, batch.tgt_y, batch.ntokens)
         # loss_node = loss_node / accum_iter
         if mode == "train" or mode == "train+log":
@@ -56,17 +54,7 @@ def run_epoch(
                 )
                 % (i, n_accum, loss / batch.ntokens, tokens / elapsed, lr)
             )
-            start = time.time()
             tokens = 0
         del loss
         del loss_node
     return total_loss / total_tokens, train_state
-
-def rate(step, model_size, factor, warmup):
-    """
-    we have to default the step to 1 for LambdaLR function
-    to avoid zero raising to negative power.
-    """
-    if step == 0:
-        step = 1
-    return factor * (model_size ** (-0.5) * min(step ** (-0.5), step * warmup ** (-1.5)) )
