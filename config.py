@@ -54,5 +54,5 @@ class Config:
         self.distributed = False
         self.num_epochs = 8
         self.accum_iter = 10
-        self.file_prefix = "multi30k_model_"
+        self.file_prefix = "model_"
         self.device = 'cuda'
