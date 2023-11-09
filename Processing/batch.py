@@ -1,12 +1,12 @@
 import torch
-            
+
 def subsequent_mask(size):
     "Mask out subsequent positions."
     attn_shape = (1, size, size)
     subsequent_mask = torch.triu(torch.ones(attn_shape), diagonal=1).type(torch.uint8)
     return subsequent_mask == 0
 
-class BatchMask:
+class Batch:
     """Object for holding a batch of data with mask during training."""
     def __init__(self, src, tgt=None, pad=2):  # 2 = <blank>
         self.src = src
