@@ -1,1 +1,3 @@
-from Architectures.architecture import EncoderDecoder, BigramLanguageModel
+from Architectures.architecture import EncoderDecoder
+from Architectures.transformer_backend import Encoder, Decoder
+from Architectures.sequence_classifier import SequenceClassifier, Config
