@@ -1,7 +1,31 @@
+import torch
+import torch.nn.functional as F
+from torch import nn
+import math
+
+class TransformerBaseClass(nn.Module):
+    """
+    Adds functionality for initialising model, loading model and saving model
+    """
+    def init_model(self, device='cuda'):
+        "first initialisation of model"
+        for p in self.parameters():
+            if p.dim() > 1:
+                nn.init.xavier_uniform_(p)
+        return self.to(device)
+    
+    def load_model(self, file_path):
+        "load from checkpoint"
+        self.load_state_dict(torch.load(file_path))
+    
+    def save_mode(self, file_path):
+        "save checkpoint"
+        torch.save(self.state_dict(), file_path)
+
 class Encoder(nn.Module):
     def __init__(self, config):
         super().__init__()
-        self.embeddings = Embeddings(config)
+        self.embeddings = Embeddings(config.enc_vocab_size, config.max_position_embeddings, config.hidden_size, config.hidden_dropout_prob)
         self.layers = nn.ModuleList([EncoderLayer(config) for _ in range(config.num_hidden_layers)])
     
     def forward(self, enc_in, mask=None):
@@ -28,14 +52,13 @@ class EncoderLayer(nn.Module):
         return x
     
 class Decoder(nn.Module):
-    def __init__(self, dec_config, enc_config):
+    def __init__(self, config):
         super().__init__()
-        self.dec_emmbeddings = Embeddings(dec_config)
-        self.enc_embeddings = Embeddings(enc_config)
+        self.embeddings = Embeddings(config.dec_vocab_size, config.max_position_embeddings, config.hidden_size, config.hidden_dropout_prob)
         self.layers = nn.ModuleList([DecoderLayer(config) for _ in range(config.num_hidden_layers)])
         
     def forward(self, dec_in, memory, dec_mask=None, enc_mask=None):
-        x = self.dec_embeddings(dec_in)
+        x = self.embeddings(dec_in)
         for layer in self.layers:
             x = layer(x, memory, dec_mask, enc_mask)
         return x
@@ -125,12 +148,12 @@ class CrossAttentionHead(nn.Module):
         return attn_outputs
     
 class Embeddings(nn.Module):
-    def __init__(self, config):
+    def __init__(self, vocab_size, max_position_embeddings, hidden_size, hidden_dropout_prob):
         super().__init__()
-        self.token_embeddings = nn.Embedding(config.vocab_size, config.hidden_size)
-        self.position_embeddings = nn.Embedding(config.max_position_embeddings, config.hidden_size)
-        self.layer_norm = nn.LayerNorm(config.hidden_size, eps=1e-12)
-        self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.token_embeddings = nn.Embedding(vocab_size, hidden_size)
+        self.position_embeddings = nn.Embedding(max_position_embeddings, hidden_size)
+        self.layer_norm = nn.LayerNorm(hidden_size, eps=1e-12)
+        self.dropout = nn.Dropout(hidden_dropout_prob)
     
     def forward(self, input_ids):
         # Create position IDs for input sequence
@@ -147,9 +170,8 @@ class Embeddings(nn.Module):
     
 def scaled_dot_product_attention(query, key, value, mask=None):
     dim_k = query.size(-1)
-    scores = torch.bmm(query, key.transpose(1, 2)) / sqrt(dim_k)
+    scores = torch.bmm(query, key.transpose(1, 2)) / math.sqrt(dim_k)
     if mask is not None:
         scores = scores.masked_fill(mask == 0, float("-inf"))
     weights = F.softmax(scores, dim=-1)
     return weights.bmm(value)
-    
